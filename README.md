@@ -1,2 +1,344 @@
 emissor-contratos-mobile.md
 geração de contrato  de cláusulas variáveis com termos de contrato e assinatura em relevo digital e com selo digital com autentificação de dispositivo.
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emissor de Contratos</title>
+    <!-- Biblioteca jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 15px; max-width: 500px; margin: auto; background: #f4f6f8; color: #333; }
+        .card { background: white; padding: 16px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin-bottom: 16px; }
+        label { font-weight: bold; display: block; margin-top: 10px; font-size: 13px; }
+        input, select { width: 100%; padding: 10px; margin-top: 4px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; }
+        canvas { 
+            border: 1px solid #bbb; 
+            border-radius: 6px; 
+            width: 100%; 
+            height: 120px; 
+            background: #fff; 
+            touch-action: none; 
+            display: block; 
+            margin-top: 5px; 
+            box-sizing: border-box;
+        }
+        .btn-clear { background: #e0e0e0; border: none; padding: 6px 12px; font-size: 12px; margin-top: 6px; border-radius: 4px; cursor: pointer; }
+        .btn-submit { background: #007bff; color: white; border: none; padding: 14px; width: 100%; font-size: 16px; border-radius: 6px; font-weight: bold; margin-top: 15px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2><font color="red" size="6">📄 Emissor de Contrato</font></h2>
+    
+    <div style="text-align: center; width: 100%;">
+        <h4 style="color: red; margin: 1px 0;">TERMOS DO CONTRATO</h4>
+    </div>
+    <br>
+    <font face="arial" size="1">
+    CLÁUSULA 1ª – DO OBJETO E PLANOS DE AQUISIÇÃO
+O presente instrumento tem por objeto a prestação dos serviços contratados, conforme a opção selecionada pelo CONTRATANTE no ato da emissão:
+​Plano Básico: R$ 500,00 (quinhentos reais).
+​Plano Profissional: R$ 1.200,00 (um mil e duzentos reais).
+​Plano Personalizado: R$ 2.500,00 (dois mil e quinhentos reais).
+<br>
+<br>
+​CLÁUSULA 2ª – DA RESCISÃO, DESISTÊNCIA E MULTA CONTRATUAL
+Em caso de desistência imotivada ou cancelamento do contrato por parte do CONTRATANTE antes da conclusão integral dos serviços, incidirá multa rescisória compensatória de 5% (cinco por cento) sobre o valor total do plano contratado, fixada nos seguintes termos:
+​Para o Plano Básico (R$ 500,00): multa rescisória no valor de R$ 25,00 (vinte e cinco reais).
+​Para o Plano Profissional (R$ 1.200,00): multa rescisória no valor de R$ 60,00 (sessenta reais).
+​Para o Plano Personalizado (R$ 2.500,00): multa rescisória no valor de R$ 125,00 (cento e vinte e cinco reais).
+<br>
+<br>
+​CLÁUSULA 3ª – DA VALIDADE JURÍDICA DAS ASSINATURAS MANUSCRITAS DIGITAIS
+As partes reconhecem expressamente a veracidade, autenticidade e validade jurídica das assinaturas e rubricas manuscritas apostas por meio digital na tela deste dispositivo, servindo o presente instrumento assinado e gerado em formato eletrônico como título líquido e certo entre os acordantes.
+    </font>
+    <br>
+    <br>
+    <marquee behavior="scroll">
+        <font face="Arial" size="3" color="GREEN">PREENCHA OS DADOS CORRETAMENTE &nbsp;&nbsp;&nbsp;&nbsp; FAÇA A ASSINATURA DIGITAL  IGUAL SEU DOCUMENTO IDENTIDADE &nbsp;&nbsp;&nbsp;&nbsp; GERE O PDF E COMPARTILHE POR WHATSSAP</font>
+    </marquee>
+    <br>
+
+    <div class="card">
+        <h3><font color="Blue" size="4">1. Dados do Contratante</font></h3>
+        <label>Nome Completo:</label>
+        <input type="text" id="nome" placeholder="Ex: Maria Souza">
+        
+        <label>CPF / CNPJ:</label>
+        <input type="text" id="doc" placeholder="000.000.000-00">
+
+        <label>Telefone / WhatsApp:</label>
+        <input type="text" id="tel" placeholder="(00) 00000-0000">
+
+        <label>Pacote Comercial:</label>
+        <select id="pacote">
+            <option value="Plano Básico - R$ 500,00">Plano Básico - R$ 500,00</option>
+            <option value="Plano Profissional - R$ 1.200,00">Plano Profissional - R$ 1.200,00</option>
+            <option value="Plano Personalizado - R$ 2.500,00">Plano Personalizado - R$ 2.500,00</option>
+        </select>
+    </div>
+
+    <div class="card">
+        <h3><font color="Blue" size="4">2. Assinaturas e Rubrica</font></h3>
+
+        <label>Rubrica (Rodapé):</label>
+        <canvas id="cvRubrica"></canvas>
+        <button type="button" class="btn-clear" onclick="limpar('cvRubrica')">Limpar</button>
+
+        <label>Assinatura do Cliente:</label>
+        <canvas id="cvCliente"></canvas>
+        <button type="button" class="btn-clear" onclick="limpar('cvCliente')">Limpar</button>
+
+        <label>Assinatura do Contratado:</label>
+        <canvas id="cvPrestador"></canvas>
+        <button type="button" class="btn-clear" onclick="limpar('cvPrestador')">Limpar</button>
+    </div>
+
+    <button type="button" class="btn-submit" onclick="gerarPDF()">Gerar Contrato Assinado (PDF)</button>
+    <button type="button" class="btn-submit" id="btnWhats" style="background: #25D366; display: Button; margin-top: 10px;" onclick="compartilharWhatsApp()">
+        📲 Enviar Contrato via WhatsApp
+    </button>
+
+    <script>
+        let ipUsuario = "Obtendo IP...";
+
+        fetch('https://api.ipify.org?format=json')
+            .then(res => res.json())
+            .then(data => {
+                ipUsuario = data.ip;
+            })
+            .catch(() => {
+                ipUsuario = "127.0.0.1 (Local/Offline)";
+            });
+
+        function gerarChaveAutenticacao(nome) {
+            const iniciais = nome.split(' ').map(n => n[0]).join('').substring(0, 3).toUpperCase() || 'DOC';
+            const timestamp = Date.now().toString(16).toUpperCase();
+            const aleatorio = Math.random().toString(16).substring(2, 6).toUpperCase();
+            return `AUTH-${new Date().getFullYear()}-${iniciais}-${timestamp.slice(-4)}-${aleatorio}`;
+        }
+
+        let pdfBlobGlobal = null;
+        let nomeClienteGlobal = "";
+        let telefoneClienteGlobal = "";
+
+        function iniciarCanvas(id) {
+            const canvas = document.getElementById(id);
+            const ctx = canvas.getContext('2d');
+            
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width || 350;
+            canvas.height = rect.height || 120;
+            
+            let desenhando = false;
+
+            function obterPonto(e) {
+                const r = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: clientX - r.left,
+                    y: clientY - r.top
+                };
+            }
+
+            function comecar(e) {
+                desenhando = true;
+                ctx.beginPath();
+                const p = obterPonto(e);
+                ctx.moveTo(p.x, p.y);
+                if (e.cancelable) e.preventDefault();
+            }
+
+            function mover(e) {
+                if (!desenhando) return;
+                const p = obterPonto(e);
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#000000';
+                ctx.lineTo(p.x, p.y);
+                ctx.stroke();
+                if (e.cancelable) e.preventDefault();
+            }
+
+            function parar() {
+                desenhando = false;
+            }
+
+            canvas.addEventListener('mousedown', comecar);
+            canvas.addEventListener('mousemove', mover);
+            window.addEventListener('mouseup', parar);
+
+            canvas.addEventListener('touchstart', comecar, { passive: false });
+            canvas.addEventListener('touchmove', mover, { passive: false });
+            window.addEventListener('touchend', parar);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                ['cvRubrica', 'cvCliente', 'cvPrestador'].forEach(iniciarCanvas);
+            }, 100);
+        });
+
+        function limpar(id) {
+            const canvas = document.getElementById(id);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function gerarPDF() {
+            const nome = document.getElementById('nome').value.trim();  
+            const doc = document.getElementById('doc').value.trim();
+            const tel = document.getElementById('tel').value.trim();
+            const pacote = document.getElementById('pacote').value;
+
+            if (!nome || !doc) {
+                alert('Por favor, preencha o Nome e o Documento do cliente.');
+                return;
+            }
+
+            nomeClienteGlobal = nome;
+            telefoneClienteGlobal = tel.replace(/\D/g, '');
+
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const dataHoje = new Date().toLocaleDateString('pt-BR');
+
+            // Cabeçalho
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(13);
+            pdf.text('INSTRUMENTO PARTICULAR DE PRESTAÇÃO DE SERVIÇOS', 15, 20);
+
+            // Dados do Contratante
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(9.5);
+            pdf.text(`Data de Emissão: ${dataHoje}`, 15, 30);
+            pdf.text(`CONTRATANTE: ${nome} | Documento: ${doc} | Telefone: ${tel}`, 15, 36);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(`PACOTE SELECIONADO: ${pacote}`, 15, 42);
+
+            pdf.line(15, 46, 195, 46);
+
+            // Cláusulas
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(8.5);
+
+            let y = 52;
+            const larguraTexto = 180;
+
+            const textoClausula1 = 
+                "CLÁUSULA 1ª – DO OBJETO E VALORES: O presente contrato tem por objeto a prestação dos serviços acordados. O valor do investimento corresponde ao plano contratado: Plano Básico (R$ 500,00), Plano Profissional (R$ 1.200,00) ou Plano Personalizado (R$ 2.500,00).";
+            const linhasC1 = pdf.splitTextToSize(textoClausula1, larguraTexto);
+            pdf.text(linhasC1, 15, y);
+            y += (linhasC1.length * 4.5) + 4;
+
+            const textoClausula2 = 
+                "CLÁUSULA 2ª – DA RESCISÃO E MULTA: Em caso de cancelamento ou desistência por parte do CONTRATANTE antes da conclusão integral dos serviços, aplicar-se-á multa rescisória de 5% sobre o valor total do plano: R$ 25,00 para o Plano Básico; R$ 60,00 para o Plano Profissional; e R$ 125,00 para o Plano Personalizado.";
+            const linhasC2 = pdf.splitTextToSize(textoClausula2, larguraTexto);
+            pdf.text(linhasC2, 15, y);
+            y += (linhasC2.length * 4.5) + 4;
+
+            const textoClausula3 = 
+                "CLÁUSULA 3ª – DA VALIDADE JURÍDICA: As partes reconhecem expressamente a autenticidade e validade jurídica das assinaturas e rubricas recolhidas eletronicamente na tela deste dispositivo, servindo o presente contrato digital como título representativo de obrigação certa entre os acordantes.";
+            const linhasC3 = pdf.splitTextToSize(textoClausula3, larguraTexto);
+            pdf.text(linhasC3, 15, y);
+
+            // Captura das Assinaturas e Rubrica
+            const imgCli = document.getElementById('cvCliente').toDataURL('image/png');
+            const imgPrest = document.getElementById('cvPrestador').toDataURL('image/png');
+            const imgRubrica = document.getElementById('cvRubrica').toDataURL('image/png');
+
+            const yAssinaturas = 205;
+
+            // Assinatura Contratante
+            pdf.addImage(imgCli, 'PNG', 15, yAssinaturas - 22, 65, 22);
+            pdf.line(15, yAssinaturas, 85, yAssinaturas);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(8.5);
+            pdf.text('Assinatura do Contratante', 15, yAssinaturas + 5);
+
+            // Assinatura Contratado
+            pdf.addImage(imgPrest, 'PNG', 115, yAssinaturas - 22, 65, 22);
+            pdf.line(115, yAssinaturas, 185, yAssinaturas);
+            pdf.text('Assinatura do Contratado', 115, yAssinaturas + 5);
+
+            // Rubrica no rodapé
+            pdf.addImage(imgRubrica, 'PNG', 160, 255, 30, 15);
+            pdf.setFontSize(7.5);
+            pdf.text('Rubrica Eletrônica', 160, 273);
+
+            // === CARIMBO / SELO DE AUTENTICAÇÃO DIGITAL ===
+            const dataHoraExata = new Date().toLocaleString('pt-BR');
+            const chaveValidadora = gerarChaveAutenticacao(nome);
+            const ySelo = 235;
+
+            pdf.setFillColor(248, 249, 250);
+            pdf.setDrawColor(180, 180, 180);
+            pdf.rect(15, ySelo, 135, 22, 'FD');
+
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(7.5);
+            pdf.setTextColor(0, 100, 0);
+            pdf.text('✔ SELO DE AUTENTICAÇÃO DIGITAL E AUDITORIA', 18, ySelo + 5);
+
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(6.5);
+            pdf.setTextColor(60, 60, 60);
+            pdf.text(`Chave do Documento: ${chaveValidadora}`, 18, ySelo + 9.5);
+            pdf.text(`Data/Hora do Registro: ${dataHoraExata} (Horário de Brasília)`, 18, ySelo + 13.5);
+            pdf.text(`IP de Origem: ${ipUsuario} | Dispositivo Móvel Touchscreen`, 18, ySelo + 17.5);
+
+            pdf.setTextColor(0, 0, 0);
+            pdf.setDrawColor(0, 0, 0);
+
+            // Salva o PDF e exibe o botão do WhatsApp
+            const nomeArquivo = `Contrato_${nome.replace(/\s+/g, '_')}.pdf`;
+            pdfBlobGlobal = pdf.output('blob');
+            pdf.save(nomeArquivo);
+
+            document.getElementById('btnWhats').style.display = 'block';
+        }
+
+        async function compartilharWhatsApp() {
+            if (!pdfBlobGlobal) {
+                alert("Gere o contrato em PDF primeiro.");
+                return;
+            }
+
+            const nomeArquivo = `Contrato_${nomeClienteGlobal.replace(/\s+/g, '_')}.pdf`;
+            const arquivoPdf = new File([pdfBlobGlobal], nomeArquivo, { type: 'application/pdf' });
+
+            if (navigator.canShare && navigator.canShare({ files: [arquivoPdf] })) {
+                try {
+                    await navigator.share({
+                        title: 'Contrato de Prestação de Serviços',
+                        text: `Olá ${nomeClienteGlobal}, segue o contrato assinado referente aos nossos serviços.`,
+                        files: [arquivoPdf]
+                    });
+                    return;
+                } catch (err) {
+                    // Usuário cancelou o compartilhamento nativo
+                }
+            }
+
+            const mensagem = encodeURIComponent(`Olá ${nomeClienteGlobal}, segue o nosso contrato formalizado e assinado.`);
+            let urlWhats = "";
+
+            if (telefoneClienteGlobal.length >= 10) {
+                const ddi = telefoneClienteGlobal.startsWith('55') ? '' : '55';
+                urlWhats = `https://wa.me/${ddi}${telefoneClienteGlobal}?text=${mensagem}`;
+            } else {
+                urlWhats = `https://api.whatsapp.com/send?text=${mensagem}`;
+            }
+
+            window.open(urlWhats, '_blank');
+        }
+    </script>
+</body>
+</html>
+
+
+https://github.com/user-attachments/assets/02866be3-79ed-49ae-980f-4006653c252b
+
